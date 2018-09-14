@@ -1,11 +1,10 @@
 var request = require('request');
 var fs = require('fs');
+var https = require('https'); 
 var numbers = [];
-var https = require('https');    
 var urls = [];
 var filenames = [];
-var j;
-var test;
+
 
 function numGen(){
     for (var i = 1; i < 11; i++){
@@ -27,7 +26,7 @@ urlGen();
 
 function filenameGen() {
     for (h = 0; h < 10; h++){
-        filename = '/home/ec2-user/environment/data/m'+numbers[h]+'.txt';
+        filename = '/home/ec2-user/environment/Week1/data/m'+numbers[h]+'.txt';
         filenames.push(filename);
     };
 };
@@ -38,14 +37,14 @@ for(var i = 0; i < urls.length; i++){
     var current = urls[i];
     var filenameCurrent = filenames[i];
 
-    GetMyResourceData(current, filenameCurrent);
+    getData(current, filenameCurrent);
 }
 
-function GetMyResourceData(current, filenameCurrent){
+function getData(current, filenameCurrent){
     result = request(current, function(error, response, body){
-    if (!error && response.statusCode == 200) {
-        fs.writeFileSync(filenameCurrent, body);
-    }
-    else {console.log("Request failed!")};
-});
+        if (!error && response.statusCode == 200) {
+           fs.writeFileSync(filenameCurrent, body);
+        }
+        else {console.log("Request failed!")};
+    });
 };
