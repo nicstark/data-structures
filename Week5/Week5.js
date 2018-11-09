@@ -20,13 +20,13 @@ diaryEntries.push(new DiaryEntry(1, 'October 12 2018 10:20:00 GMT', "Hot Ones", 
 diaryEntries.push(new DiaryEntry(2, 'October 12 2018 12:00:00 GMT', "How to Grow Crystals", ["Reference", "Tutorial"], "YouTube"));
 
 
-console.log(diaryEntries);
+// console.log(diaryEntries);
 
 var AWS = require('aws-sdk');
 AWS.config = new AWS.Config();
 AWS.config.accessKeyId = process.env.AWS_ID;
 AWS.config.secretAccessKey = process.env.AWS_KEY;
-AWS.config.region = "us-east-2";
+AWS.config.region = "us-east-1";
 
 var dynamodb = new AWS.DynamoDB();
 
@@ -34,7 +34,7 @@ var dynamodb = new AWS.DynamoDB();
 diaryEntries.forEach(function(entry) {
   var params = {};
   params.Item = entry; 
-params.TableName = "deardiary";
+params.TableName = "deardiary2";
 
 dynamodb.putItem(params, function (err, data) {
   if (err) console.log(err, err.stack); // an error occurred

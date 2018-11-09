@@ -15,11 +15,11 @@ client.connect();
 console.log(1)
 
 // Sample SQL statement to create a table: 
-// var thisQuery = "CREATE TABLE aalocations (address varchar(100), lat double precision, long double precision);";
+var thisQuery = "CREATE TABLE aalocations (placeName varchar(100), mtgName varchar(100), mtgAddress varchar(100), mtgRoom varchar(100), mtgAdd varchar(200), lat double precision, long double precision, mtgInterest varchar(200), mtgType varchar(200), mtgDetails varchar(300), wheelchair boolean, mtgStart time, mtgstarthour int, mtgstartminute int, mtgEnd time, mtgDay varchar(30));";
 // Sample SQL statement to delete a table: 
-// var thisQuery = "DROP TABLE aalocations;"; 
+//var thisQuery = "DROP TABLE aalocations;"; 
 // Sample SQL statement to query the entire contents of a table: 
-var thisQuery = "SELECT * FROM aalocations;";
+//var thisQuery = "SELECT * FROM aalocations;";
 
 client.query(thisQuery, (err, res) => {
     console.log(err, res);

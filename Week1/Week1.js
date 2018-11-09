@@ -6,6 +6,7 @@ var urls = [];
 var filenames = [];
 
 
+//Generate numbers for each of the pages
 function numGen(){
     for (var i = 1; i < 11; i++){
         var num =(('0' + i).slice(-2));
@@ -15,6 +16,7 @@ function numGen(){
 
 numGen();
 
+//Generate URL's for each of the pages
 function urlGen(){
     for (h = 0; h < 10; h++){
         url = 'https://parsons.nyc/aa/m'+numbers[h]+'.html';
@@ -24,6 +26,7 @@ function urlGen(){
 
 urlGen();
 
+//Generate filenames for each of the text files
 function filenameGen() {
     for (h = 0; h < 10; h++){
         filename = '/home/ec2-user/environment/Week1/data/m'+numbers[h]+'.txt';
@@ -33,6 +36,8 @@ function filenameGen() {
 
 filenameGen();
 
+
+//Iterate over the URL's and fetch the data
 for(var i = 0; i < urls.length; i++){
     var current = urls[i];
     var filenameCurrent = filenames[i];
