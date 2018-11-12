@@ -1,34 +1,28 @@
 var fs = require('fs');
+var async = require('async'); // npm install async
 var cheerio = require('cheerio');
 
+const files = ["m01.txt","m02.txt","m03.txt","m04.txt","m05.txt","m06.txt","m07.txt","m08.txt","m09.txt","m10.txt"];
 
 
-const regions = ["m01.txt","m02.txt","m03.txt","m04.txt","m05.txt","m06.txt","m07.txt","m08.txt","m09.txt","m10.txt"];
+function readAsync(file, callback) {
+    location = "./Week1/data/" + file;
+    fs.readFile(location, 'utf8', callback);
+}
 
-
-
-
-//[{address:address, latLong:{lat:lat,long:long},meeting strart:meeting strart, 
-//meeting end:meeting end, meeting day:int, meetingType: int; specialInterest: string, 
-//specialNotes: string, placeName:string, additionalInstruction:string, wheelChair:bool}]
-
-
-
-
-//Find each section with address in it and push it to an array
-for (var i=0;i<regions.length;i++){
+async.map(files, readAsync, function(err, results) {
+    // results = ['file 1 content', 'file 2 content', ...]
+    console.log(results.length);
+    results.forEach(function (file, m){    
     const final = [];
     const html = [];
     const html2 = [];
-    
-    
-    
     const meetingType = [];
     const meetingDay = [];
     const finalAddresses = [];
-    var fileLocation = "Week1/data/" + regions[i];
-    var content = fs.readFileSync(fileLocation);
+    var content = file;
     var $ = cheerio.load(content);
+   
     $('td').each(function(i, elem) {
         if ($(elem).attr('style') === 'border-bottom:1px solid #e3e3e3; width:260px'){
         html.push($(elem).html())
@@ -37,45 +31,41 @@ for (var i=0;i<regions.length;i++){
         html2.push($(elem).html())
         }
     });
-    
-    
-    
-    
-    
+
     for (i = 0; i < html2.length; i++) {
         html2[i] = html2[i].replace(/[\n\t\r]/g,"");
         html2[i] = html2[i].replace(/\s\s+/g, '');
         html2[i] = html2[i].split(/\<br\>\<br\>/);
-    
+
             for (h = 0; h < html2[i].length; h++){
-               html2[i][h] = html2[i][h].split(/\<br\>/);
-            
-    
-    
-    
+              html2[i][h] = html2[i][h].split(/\<br\>/);
+        
+
+
+
         for (j = 0; j < html2[i][h].length; j++){
-    
+
         html2[i][h][j] = html2[i][h][j].trim();
         html2[i][h][j] = html2[i][h][j].split(/\<\w+\>|\<\/\w+\>/);
         }
     };
     };
-    
-    
+
+
     //Iterate over the items in the arracy to pull out just the address, push it to a new array
     for (i = 0; i < html.length; i++) {
-    
+
         html[i] = html[i].replace("&amp;", "&");
         html[i] = html[i].replace("&apos;", "'");
         meeting = {};
         meeting.wheelchair = html[i].includes("jpg");
         html[i] = html[i].split('<br>');
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
         meeting.place = html[i][0].trim().split(/\<|\>/)[2];
         meeting.name = html[i][1].trim().split(" - ");
         meeting.name = meeting.name[0];
@@ -89,65 +79,69 @@ for (var i=0;i<regions.length;i++){
         meeting.additionalAddress = html[i][3].split("NY");
         meeting.additionalAddress = meeting.additionalAddress[0].replace(/[{()}]/g, '').trim();
         meeting.time = []
-    
+
         for (j = 0; j < html2[i].length-1; j++){
             meetingTime = {};
             meetingTime.day = html2[i][j][0][1].split(" ")[0];
             meetingTime.start = html2[i][j][0][2].trim();
             meetingTime.end = html2[i][j][0][4].trim();
-            
+        
                 if( typeof(html2[i][j][1])==="undefined" ) {
                     html2[i][j][1] = 9;
                 };
-    
+
             meetingTime.type = html2[i][j][1][2];
-        
+    
             if(html2[i][j].length > 2){
                 meetingTime.interest = html2[i][j][2][2]
             };
-    
+
             meeting.time.push(meetingTime);
         };
-        
+    
             if (html[i].length == 4){
             meeting.details = 9;
-            
+        
         }    
         if (html[i].length == 5){
             meeting.details = html[i][4].trim().split(/\<|\>/)[2];
-            
-        }
         
+        }
+    
             if (html[i].length == 6){
             meeting.details = html[i][5].trim().split(/\<|\>/)[2];
-            
-        }
         
+        }
+    
                 if (html[i].length == 7){
             meeting.details = html[i][5].trim().split(/\<|\>/)[2];
-    
-            
-        }
+
         
+        }
+    
         if (meeting.details == undefined)
         {meeting.details = "n/a";};
-        
+    
         meeting.details = meeting.details.trim()
-        
     
-        
-    
-    
-        
-        final.push(meeting);
-    
-    }
-    
-    
-    
-    fs.writeFileSync('i'+'.json', JSON.stringify(final));
-    
-    str = JSON.stringify(final, null, 4); // (Optional) beautiful indented output.
-    console.log(str); // Logs output to dev tools console.
 
-};
+    
+
+
+    
+        final.push(meeting);
+
+
+    fs.writeFileSync('final'+m+'.json', JSON.stringify(final));
+
+    // str = JSON.stringify(final, null, 4); // (Optional) beautiful indented output.
+    // console.log(str); // Logs output to dev tools console.
+}
+    
+    });
+    
+    });
+    
+    
+    
+

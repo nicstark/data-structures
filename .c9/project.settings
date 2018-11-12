@@ -3,7 +3,7 @@
         "@saveall": true
     },
     "instance": {
-        "@automaticShutdown": "60"
+        "@automaticShutdown": "never"
     },
     "language": {
         "tern_defs": {

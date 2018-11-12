@@ -20,11 +20,6 @@ var offsetFix = [];
 
 var current;
 
-//iterating over the addresses to remove any uneeded information
-// for (i = 0; i < addresses.length; i++) {
-//     addresses[i] = addresses[i].split(/[.,\/#!$%\^\*;:{}=\-_`~()]/g)[0];
-// };
-
 //Here we're using async to keep from the data getting mixed up as the api spits it back to us
 //eachSeries in the async module iterates over an array and operates on each item in the array in series
 async.eachSeries(addresses, function(value, callback) {
