@@ -1,11 +1,9 @@
 var diaryEntries = [];
 
 class DiaryEntry {
-  constructor(primaryKey, date, program, genre, platform) {
-    this.pk = {};
-    this.pk.N = primaryKey.toString();
-    this.date = {}; 
-    this.date.S = new Date(date).toDateString();
+  constructor(dt, program, genre, platform) {
+    this.dt = {}; 
+    this.dt.S = new Date(dt).valueOf().toString();
     this.program = {};
     this.program.S = program;
     this.genre = {};
@@ -15,12 +13,11 @@ class DiaryEntry {
   }
 }
 
-diaryEntries.push(new DiaryEntry(0, 'October 11 2018 12:24:00 GMT', "Midnight Diner", ["Food", "Drama", "Mystery"], "Netflix"));
-diaryEntries.push(new DiaryEntry(1, 'October 12 2018 10:20:00 GMT', "Hot Ones", ["Food", "Interview"], "YouTube"));
-diaryEntries.push(new DiaryEntry(2, 'October 12 2018 12:00:00 GMT', "How to Grow Crystals", ["Reference", "Tutorial"], "YouTube"));
+diaryEntries.push(new DiaryEntry('October 11 2018 12:24:00 GMT', "Midnight Diner", ["Food", "Drama", "Mystery"], "Netflix"));
+diaryEntries.push(new DiaryEntry('October 12 2018 10:20:00 GMT', "Hot Ones", ["Food", "Interview"], "YouTube"));
+diaryEntries.push(new DiaryEntry('October 12 2018 12:00:00 GMT', "How to Grow Crystals", ["Reference", "Tutorial"], "YouTube"));
 
 
-// console.log(diaryEntries);
 
 var AWS = require('aws-sdk');
 AWS.config = new AWS.Config();
@@ -34,7 +31,7 @@ var dynamodb = new AWS.DynamoDB();
 diaryEntries.forEach(function(entry) {
   var params = {};
   params.Item = entry; 
-params.TableName = "deardiary2";
+params.TableName = "deardiary3";
 
 dynamodb.putItem(params, function (err, data) {
   if (err) console.log(err, err.stack); // an error occurred

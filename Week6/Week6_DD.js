@@ -10,17 +10,16 @@ var dynamodb = new AWS.DynamoDB();
 var value1 = 1;
 
 var params = {
-    TableName : "deardiary2",
-    KeyConditionExpression: "pl = :platformName and #pk = :pk", // the query expression
+    TableName : "deardiary3",
+    KeyConditionExpression: "#pl = :platformName and #dt between :minDate and :maxDate", // the query expression
     ExpressionAttributeNames: { // name substitution, used for reserved words in DynamoDB
-        "#pk" : "pk",
-        // "pl" : "platform"
+         "#pl" : "platform",
+         "#dt" : "dt"
     },
     ExpressionAttributeValues: { // the query values
-        ":pk" : {N: "2"},
         ":platformName": {S: "YouTube"},
-        // ":minDate": {N: new Date("September 1, 2018").valueOf().toString()},
-        // ":maxDate": {N: new Date("October 16, 2018").valueOf().toString()}
+        ":minDate": {S: new Date("October 10, 2018").valueOf().toString()},
+        ":maxDate": {S: new Date("October 13, 2018").valueOf().toString()}
     }
 };
 
@@ -28,9 +27,13 @@ dynamodb.query(params, function(err, data) {
     if (err) {
         console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
     } else {
+        console.log(params);
         console.log("Query succeeded.");
+        console.log(data.Items.length)
         data.Items.forEach(function(item) {
             console.log("***** ***** ***** ***** ***** \n", item);
+            
         });
     }
 });
+
