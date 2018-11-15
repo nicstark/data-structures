@@ -61,8 +61,6 @@ async.eachSeries(addresses, function(value, callback) {
     }
     
     fs.writeFileSync('master_final_geocode.json', JSON.stringify(addresses));
-    console.log('*** *** *** *** ***');
-    console.log('Number of meetings in this zone: ');
-    console.log(meetingsData.length);
+
 });
 

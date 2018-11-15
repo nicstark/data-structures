@@ -13,7 +13,6 @@ async.map(files, readAsync, function(err, results) {
         temp = JSON.parse(file);
         temp.forEach(function(obj, h){
             final.push(obj);
-
         })
     })
 });
