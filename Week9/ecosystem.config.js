@@ -10,7 +10,11 @@ module.exports = {
     watch: false,
     max_memory_restart: '1G',
     env: {
-      NODE_ENV: 'development'
+      NODE_ENV: 'development',
+      AWSRDS_EP: 'bedsidelamp.cwwncl1cgazu.us-east-2.rds.amazonaws.com',
+      AWSRDS_PW: '1w0w2w1maz',
+      PHOTON_ID: '3b0043000f47353136383631',
+      PHOTON_TOKEN: '8eda98f7956ff8533969aa9a072d94f564487884'
     },
     env_production: {
       NODE_ENV: 'production'
