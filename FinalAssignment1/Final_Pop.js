@@ -4,8 +4,8 @@ var fs = require('fs');
 
 // AWS RDS POSTGRESQL INSTANCE
 var db_credentials = new Object();
-db_credentials.user = 'eufouria';
-db_credentials.host = 'aadb.ccoykd2vks05.us-east-1.rds.amazonaws.com';
+db_credentials.user = 'starn986';
+db_credentials.host = 'aadb.cwwncl1cgazu.us-east-2.rds.amazonaws.com';
 db_credentials.database = 'aadb';
 db_credentials.password = process.env.AWSRDS_PW;
 db_credentials.port = 5432;
