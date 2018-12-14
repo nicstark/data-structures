@@ -6,9 +6,6 @@ var $ = cheerio.load(content);
 const final = [];
 const html = [];
 const html2 = [];
-
-
-
 const meetingType = [];
 const meetingDay = [];
 const finalAddresses = [];
@@ -31,9 +28,7 @@ $('td').each(function(i, elem) {
     }
 });
 
-
-
-
+//Clean up weird characters
 
 for (i = 0; i < html2.length; i++) {
     html2[i] = html2[i].replace(/[\n\t\r]/g,"");
@@ -43,9 +38,6 @@ for (i = 0; i < html2.length; i++) {
         for (h = 0; h < html2[i].length; h++){
            html2[i][h] = html2[i][h].split(/\<br\>/);
         
-
-
-
     for (j = 0; j < html2[i][h].length; j++){
 
     html2[i][h][j] = html2[i][h][j].trim();
@@ -67,7 +59,7 @@ for (i = 0; i < html.length; i++) {
 
 
 
-
+//More cleaning and prepping strings, adding them to objects
 
     meeting.place = html[i][0].trim().split(/\<|\>/)[2];
     meeting.name = html[i][1].trim().split(" - ");
@@ -136,6 +128,7 @@ for (i = 0; i < html.length; i++) {
 
 }
 
+//Write all the data to a JSON file
 
 
 fs.writeFileSync('m10_addresses.json', JSON.stringify(final));

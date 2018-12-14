@@ -1,161 +1,126 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<body class="container">
 <style>
 
 body {
-  background: #091954;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  position: relative;
-}
-.container {
-  display: grid;
-  grid-template-columns: 100px auto;
-  grid-template-rows: auto;
+  background: #fff;
 }
 
-.controls {
-  /*position: absolute;
-  top: 1em;
-  left: 1em;*/
-  grid-column-start: 1;
-  grid-column-end: 1;
-  grid-row-start: 1;
-  grid-row-end: 1;
+svg{
+	stroke: #000;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
 }
-button { margin: 1em 0 1em 0; }
 
-
-canvas {
-  grid-column-start: 2;
-  grid-column-end: 2;
-  grid-row-start: 1;
-  grid-row-end: 1;
+#rim {
+  fill: none;
+  stroke: #999;
+  stroke-width: 3px;
 }
+
+.second-hand{
+	stroke-width:3;
+
+}
+
+.minute-hand{
+	stroke-width:8;
+	stroke-linecap:round;
+}
+
+.hour-hand{
+	stroke-width:12;
+	stroke-linecap:round;
+}
+
+.hands-cover{
+	stroke-width:3;
+	fill:#fff;
+}
+
+.second-tick{
+	stroke-width:3;
+	fill:#000;	
+}
+
+.hour-tick{
+	stroke-width:8; //same as the miute hand
+}
+
+.second-label{
+	font-size: 12px;
+}
+
+.hour-label{
+	font-size: 24px;
+}
+
 
 </style>
-<script src="//d3js.org/d3.v3.min.js"></script>
-      <script src="https://d3js.org/d3-array.v1.min.js"></script>
-      <script src="https://d3js.org/d3-color.v1.min.js"></script>
-      <script src="https://d3js.org/d3-format.v1.min.js"></script>
-      <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-      <script src="https://d3js.org/d3-time.v1.min.js"></script>
-      <script src="https://d3js.org/d3-time-format.v2.min.js"></script>
-      <script src="https://d3js.org/d3-scale.v2.min.js"></script>
+<body>
+<script src="https://d3js.org/d3.v3.min.js"></script>
 <script>
 
-var data = d3.range(5).map(function() {
-  return {xloc: 0, yloc: 0, xvel: 0, yvel: 0};
-});
+var radians = 0.0174532925, 
+	clockRadius = 200,
+	margin = 50,
+	width = (clockRadius+margin)*2,
+    height = (clockRadius+margin)*2,
+    hourHandLength = 2*clockRadius/3,
+    minuteHandLength = clockRadius,
+    secondHandLength = clockRadius-12,
+    secondHandBalance = 30,
+    secondTickStart = clockRadius;
+    secondTickLength = -10,
+    hourTickStart = clockRadius,
+    hourTickLength = -18
+    secondLabelRadius = clockRadius + 16;
+    secondLabelYOffset = 5
+    hourLabelRadius = clockRadius - 40
+    hourLabelYOffset = 7;
 
-var width = 1550,
-    height = 800,
-    angle = 2 * Math.PI;
 
-var x = d3.scale.linear()
-    .domain([-5, 5])
-    .range([0, width]);
+var hourScale = d3.scale.linear()
+	.range([0,360])
+	.domain([0,24]);
 
-var y = d3.scale.linear()
-    .domain([-5, 5])
-    .range([0, height]);
 
-var canvas = d3.select("body").append("canvas")
-    .attr("width", width)
-    .attr("height", height);
 
-var context = canvas.node().getContext("2d");
-context.fillStyle = "white";
-context.strokeStyle = "#FFF";
-context.strokeWidth = 50;
 
-//-----------------------------------------
+function drawClock(){ //create all the clock elements
 
-var centerX = 150;
-        var centerY = 150;
-        context.moveTo(centerX, centerY);
-    
-        var gap = 1.8; // increase this for spacing between spiral lines        
-        var STEPS_PER_ROTATION = 60; // increasing this makes the curve smoother
-    
-        var increment = 2*Math.PI/STEPS_PER_ROTATION;		
-        var theta = increment;
-        while( theta < 20*Math.PI) {
-           var newX = centerX + theta * Math.cos(theta) * gap; 
-           var newY = centerY + theta * Math.sin(theta) * gap; 
-           context.lineTo(newX, newY);
-           theta = theta + increment;
-        }
-        context.stroke(); // draw the spiral
+	var svg = d3.select("body").append("svg")
+	    .attr("width", width)
+	    .attr("height", height);
 
-//--------------------------------------
+	var face = svg.append('g')
+		.attr('id','clock-face')
+		.attr('transform','translate(' + (clockRadius + margin) + ',' + (clockRadius + margin) + ')');
 
-// var data = [1,2,13,20,23];
 
-// var scale = d3.scale.linear()
-//   .range([10, 390])
-//   .domain([1,23]);
 
-// data.forEach(function(d, i) {
-//   context.beginPath();
-//   context.rect(scale(d), 150, 10, 10);
-//   context.fillStyle="red";
-//   context.fill();
-//   context.closePath();
-// });
 
-//-------------------------------------
+	face.selectAll('.second-label')
+		.data(d3.range(1,25,1))
+			.enter()
+			.append('text')
+			.attr('class', 'second-label')
+			.attr('text-anchor','middle')
+			.attr('x',function(d){
+				return secondLabelRadius*Math.sin(hourScale(d)*radians);
+			})
+			.attr('y',function(d){
+				return -secondLabelRadius*Math.cos(hourScale(d)*radians) + secondLabelYOffset;
+			})
+			.text(function(d){
+				return d;
+			});
 
-    //   start = 0,
-    //   end = 3.3333333,
-    //   numSpirals = 10
-    //   margin = {top:50,bottom:50,left:50,right:50};
-    
-    // var theta = function(r) {
-    //   return numSpirals * Math.PI * r;
-    // };
+}
 
-    // // used to assign nodes color by group
-    // //var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    // var r = d3.min([width, height]) / 2 - 40;
-    
-    // var points = d3.range(start, end + 0.001, (end - start) / 1000);
 
-    // var spiral = d3.radialLine()
-    //   .curve(d3.curveCardinal)
-    //   .angle(theta)
-    //   .radius(radius);
 
-    // var path = svg.append("path")
-    //   .datum(points)
-    //   .attr("id", "spiral")
-    //   .attr("d", spiral)
-    //   .style("fill", "none")
-    //   .style("stroke", "#5e6fae");
-      
-    //   function spiral(){
-    //     context.beginPath
-    //   }
-//----------------------------------------
+drawClock();
 
-// draw(function() {
-//   //context.clearRect(0, 0, width, height);
-
-//   data.forEach(function(d,i) {
-//     d.xloc;
-//     d.yloc;
-//     context.fillStyle = i % 3 == 0 ? "lightblue" : i % 3 == 1 ? "yellow" : "white";
-//     context.beginPath();
-
-//     context.arc(x(d.xloc), y(d.yloc), 1.4*Math.min(1 + 1000 * Math.abs(d.xvel * d.yvel), 10), 0, angle);
-//     context.fill();
-//     //context.stroke();
-//   });
-// });
-
-// draw();
 
 </script>
-</body>
-</html>
