@@ -4,10 +4,57 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <title>Bedside Lamp Visualization Data</title>
     <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,900" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="style.css"/>
       <script data-require="d3@4.0.0" data-semver="4.0.0" src="https://d3js.org/d3.v4.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
+      <style>     body {
+        font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
+        margin: 0px;
+        background-color: #07163f;
+      }
+      .axis path {
+        fill: none;
+        stroke: #FFF;
+        stroke-dasharray: 2 3;
+      }
+      .axis text {
+        font-size: 13px;
+        stroke: #222;
+      }
+      h1 {
+        font-size: 48px;
+        color: #cab122;
+      }
+      text.title {
+        font-size: 24px;
+      }
+      circle.tick {
+        fill: "yellow";
+        stroke: "yellow";
+        stroke-dasharray: 2 3;
+      }
+      path.spiral {
+        fill: none;
+        stroke: #cab122;
+        stroke-width: 3px;
+      }
+      
+      div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 220px;					
+    height:120 px;					
+    padding: 2px;				
+    line-height: 24;
+    letter-spacing: 2;
+    font: 18px Garamond;		
+    background: none;	
+    border: 0px;		
+    border-radius: 0px;			
+    pointer-events: none;		
+    color: #cab122;
+}
+</style>
   </head>
   <body>
     <div id="chart"></div>
@@ -49,6 +96,7 @@ for (var day in groupedResults) {
     //it creates a new object and assigns some relevant values
     if (groupedResults[day][item].sensorvalue > 50 && on == 0) { 
       var block = {};
+      block.end ='none'
       block.day = day;
       block.readableStart = groupedResults[day][item].sensortime;
       block.start = Date.parse(moment(groupedResults[day][item].sensortime).utcOffset('+0100'));
@@ -85,10 +133,9 @@ for (var day in groupedResults) {
       on = 0;
      }
   }
-  
-//here a little safety measure to deal with when the lamp was on as the date turned over
+  //here a little safety measure to deal with when the lamp was on as the date turned over
 
-  if (block.end == null){
+  if (block.end == "none"){
     block.end = Date.parse(moment(groupedResults[day][item].sensortime).utcOffset('+0100'));
       block.duration = block.end - block.start;
       block.readableEnd = groupedResults[day][item].sensortime;
@@ -121,7 +168,56 @@ var bars = d3.select("svg").append("g")
 var timeScale = d3.scaleLinear()
     .domain([0,1440])
     .range([0, (2* Math.PI)]);
+    
+var x = d3.scaleLinear().domain([-50,50]).range([-width, width]);
+var y = d3.scaleLinear().domain([-50,50]).range([height, -height]);
         
+var getdata = function() {
+  var dataset = []
+  for (var i = 0; i < 200; i++) {
+    var x = d3.randomUniform(-50,50)();
+    var y = d3.randomUniform(-50,50)();
+    dataset.push({"x": x, "y": y});
+  }
+  return dataset
+}
+  
+// Get the data
+var data = getdata()
+
+// format the data
+data.forEach(function(d) {
+  d.x = +d.x;
+  d.y = +d.y;
+});
+
+// scale the range of the data
+x.domain([-50, 50]);
+y.domain([-50, 50]);
+
+// add the dots
+svg.selectAll("dot")
+  .data(data)
+  .enter().append("circle")
+  .attr("r", function getRandomInt() {
+  return Math.floor(Math.random() * Math.floor(2));
+})
+  .attr("cx", function(d) { return x(d.x); })
+  .attr("cy", function(d) { return y(d.y); })
+  .attr("fill", "white")
+  .attr("opacity", function getRandomInt() {
+  return Math.random()/1.5;
+});
+  
+            
+//add outer circle
+bars.append("circle")
+  .attr("cx", 0)
+  .attr("cy",0)
+  .attr("r", height/3)
+  .style("fill", "091954")
+  .style("stroke", "#5e6fae");
+
         
 //add the grid lines
 bars.selectAll("rect")
@@ -149,14 +245,7 @@ for (i = 0; i <dayCount; i++) {
   
 
 
-          
-//add outer circle
-bars.append("circle")
-  .attr("cx", 0)
-  .attr("cy",0)
-  .attr("r", height/3)
-  .style("fill", "none")
-  .style("stroke", "#5e6fae");
+
         
 //add grid circles   
 var circles = bars.selectAll("circle")
@@ -169,6 +258,7 @@ var circles = bars.selectAll("circle")
   .style("fill", "none")
   .style("stroke", "#16296f")
   .style("opacity", ".3");
+  
     
 //draw the 'light on' blocks
 
