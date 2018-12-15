@@ -426,7 +426,7 @@ app.get('/aameetings', function(req, res) {
     const client = new Pool(db_credentials);
     
     // SQL query 
-    var thisQuery = "SELECT mtgday, mtgstart, placeName, mtgaddress, mtgtype FROM aalocations WHERE mtgday = 'Mondays' and mtgstarthour >= 7;";
+    var thisQuery = "SELECT * FROM aalocations;";
 
     //var thisQuery = `SELECT mtgAddress, placeName as location, json_agg(json_build_object('day', mtgDay, 'time', mtgstarthour)) as meetings
       //           FROM aalocations 
