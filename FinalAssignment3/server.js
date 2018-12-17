@@ -23,29 +23,8 @@ db_credentials_sensor.port = 5432;
 AWS.config = new AWS.Config();
 AWS.config.accessKeyId = process.env.AWS_ID;
 AWS.config.secretAccessKey = process.env.AWS_KEY;
-AWS.config.region = "us-east-1";
+AWS.config.region = "us-east-2";
 
-// respond to requests for /sensor
-app.get('/sensor', function(req, res) {
-    
-    // Connect to the AWS RDS Postgres database
-    const client = new Pool(db_credentials_sensor);
-
-    // SQL query 
-    //var q = `SELECT * FROM sensorData WHERE sensorTime `;
-    //var q = `SELECT  date_trunc('day', sensorTime),   count(1) FROM sensorData GROUP BY 1`;
-    var q = "SELECT 10 FROM sensorData";
-    client.connect();
-    client.query(q, (qerr, qres) => {
-        if (qerr) { throw qerr }
-        else {
-            res.send(qres.rows);
-            client.end();
-            console.log(res)
-            console.log('1) responded to request for sensor data');
-        }
-    });
-});
 
 var s1x = `<!DOCTYPE html>
 <html>
@@ -419,6 +398,379 @@ app.get('/ss', function(req, res) {
     });
 });
 
+var ax1 = `<!DOCTYPE HTML>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>AA Meetings</title>
+      <meta name="description" content="data structures parsons">
+      <meta name="author" content="Nic Stark">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="crossorigin=""></script>
+    <script src="Leaflet.MakiMarkers.js"></script>
+    <script data-require="d3@4.0.0" data-semver="4.0.0" src="https://d3js.org/d3.v4.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:100,400,700,800" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+
+<style type="text/css">
+   
+   #body{
+   	font-family: Montserrat;
+   }
+   
+   	 #mapid {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    right: 35%;
+    bottom: 0;
+}
+	   	 #sidebar {
+ 		position: absolute;
+    top: 20%; 
+    left: 65%;
+    right: 0;
+    bottom: 0;
+    background: black;
+    color: white;
+   	font-family: Montserrat;
+    font-weight: 400;
+
+}
+
+	   	 #meetingData {
+ 		position: absolute;
+    top: 10%; 
+    left: 10%;
+    right: 10%;
+    bottom: 0;
+    background: black;
+    color: white;
+   	font-family: Montserrat;
+    font-weight: 400;
+
+}
+
+		#meetingName {
+    top: 0; 
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+   	font-family: Montserrat;
+    color: white;
+    font-weight: 700;
+    font-size:2vw;
+		}
+
+		#titlebar {
+    position: absolute;
+    top: 4%; 
+    left: 65%;
+    right: 0;
+    bottom: 80%;
+    background: white;
+    text-align: center;
+   	font-family: Montserrat;
+    font-weight: 800;
+    font-size:3vw;
+		}
+		
+    #meetingPlace {
+	    margin-top: 5%;
+    }
+	
+	#meetingAddress {
+        top: 10%; 
+    }
+	
+	#meetingAdd {
+        top: 10%; 
+    }
+	
+	#meetingRoom {
+        top: 10%; 
+    }
+ 	
+ 	#wheelchair {
+        margin-top: 3%;
+        margin-bottom: 6%;
+        top: 10%; 
+        font-size: .8vw;
+        font-weight: 400;
+    }
+ 	
+ 	#meetingDay {
+	    margin-top: 10%;
+		margin-right: 2%;
+        float:left;
+        font-weight: 800;
+ 	}
+
+	#meetingStart {
+        float:left;
+		margin-top: 10%;
+	    margin-right: 2%;
+    }
+			 	 
+	#From {
+        float:left;
+		margin-top: 10%;
+	    margin-right: 2%;
+        font-size: 1.15vw;
+        font-weight: 100;
+ 	}
+			 	
+    #To {
+        float:left;
+		margin-top: 10%;
+	    margin-right: 2%;
+        font-size: 1.15vw;
+        font-weight: 100;
+ 	}
+			 	
+    #meetingEnd {
+        display:inline-block;
+		margin-top: 10%;
+	    margin-right: 2%;
+    }
+     
+	#Type {
+        clear:both;
+        float:left;
+		margin-top: 1%;
+		margin-right: 2%;
+		margin-bottom: 5%;
+        font-weight: 100;
+	}
+			 	
+	#meetingType {
+        float:left;
+		margin-top: 1%;
+		margin-bottom: 5%;
+    }
+
+	#meetingInterest {
+        font-weight: 700;
+        font-size: 1.2vw;
+		margin-top: 1%;
+       }
+			 	
+	#meetingDetails {
+        font-weight: 700;
+        font-size: 1.2vw;
+		margin-top: 1%;
+      }
+		
+	.leaflet-popup-content-wrapper, .leaflet-popup-tip-container, .leaflet-popup-close-button{
+	    visibility: hidden;
+		height: 0;
+		width: 0;
+    } 
+
+
+   </style>
+
+
+</head>
+    <body>
+		 <div id="mapid"></div>
+	 	 <div id="titlebar">AA MEETINGS</div>
+	     <div id="sidebar">
+	 		<div id="meetingData">
+ 			 	<div id="meetingName"></div>
+ 			 	<div id="meetingPlace"></div>
+ 			 	<div id="meetingAddress"></div>
+ 			 	<div id="meetingAdd"></div>
+ 			 	<div id="meetingRoom"></div>
+  				<div id="wheelchair"></div>
+  		        <div id="meetingInterest"></div>
+ 			 	<div id="meetingDetails"></div>
+  			    <div id="meetingDay"></div>
+  			    <div id="From"></div>
+ 			 	<div id="meetingStart"></div>
+ 			 	<div id="To"></div>
+ 			 	<div id="meetingEnd"></div>
+ 			 	<div id="Type"></div>
+ 			 	<div id="meetingType"></div>
+		 	</div>
+ 		</div>
+<script>
+
+L.MakiMarkers.accessToken = "pk.eyJ1IjoiZXVmb3VyaWEiLCJhIjoiY2phdXJlYWppMDRzNjM3bzFzZmttdnIweSJ9.n_uzHxpGaFsahacYZjV5Eg";
+
+var data = `;
+
+var ax2 = `;
+
+//creating the map
+	
+var map = L.map('mapid').setView([40.75392799015035, -73.9728500751165], 12);	
+	
+//stlying the map tiles
+var tonerUrl = "http://{S}tile.stamen.com/toner-lite/{Z}/{X}/{Y}.png";
+
+var url = tonerUrl.replace(/({[A-Z]})/g, function(s) {
+    return s.toLowerCase();
+});
+
+var basemap = L.tileLayer(url, {
+    subdomains: ['','a.','b.','c.','d.'],
+    minZoom: 0,
+    maxZoom: 20,
+    type: 'png',
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>'
+});
+
+basemap.addTo(map);
+
+//styling the markers
+
+var icon = L.MakiMarkers.icon({color: "#000", size: "m"});
+
+
+customCircleMarker = L.Marker.extend({
+   options: { 
+   icon: icon,
+   lat: 'something',
+   long: 'something',
+   	meetingName: 'something',
+		 	meetingPlace: 'something',
+		 	meetingAddress: 'something',
+		 	meetingAdd: 'something',
+		 	meetingRoom: 'something',
+ 			wheelchair: 'something',
+ 			meetingDay: 'something',
+		 	meetingStart: 'something',
+		 	meetingEnd: 'something',
+		 	meetingType: 'something',
+		 	meetingInterest: 'something',
+		 	meetingDetails: 'something'
+   }
+});
+
+//adding the geolocator function
+L.control.locate({locateOptions: {maxZoom: 15}}).addTo(map);
+
+var markerGroup = L.layerGroup().addTo(map);
+
+var currentLocation;
+
+//function to convert values to a hex color
+function rgbToHex(r, g, b) {
+  var rgb = b | (g << 8) | (r << 16);
+  return (0x1000000 | rgb).toString(16).substring(1);
+}
+    
+
+//function to add the markers to the map
+function drawMarkers() {
+
+    markerGroup.clearLayers();
+
+    for (var i=0; i<data.length; i++) {
+
+        var icon = L.MakiMarkers.icon({color: "000", size: "m"});
+
+        var myMarker = new L.marker([data[i].lat, data[i].long], { 
+            icon: icon,
+            lat: data[i].lat,
+            long: data[i].long,
+            meetingName: data[i].mtgname,
+            meetingPlace: data[i].placename,
+            meetingAddress: data[i].mtgaddress,
+            meetingAdd: data[i].mtgadd,
+            meetingRoom: data[i].mtgroom,
+            wheelchair: data[i].wheelchair,
+            meetingDay: data[i].mtgday,
+            meetingStart: data[i].mtgstart,
+            meetingEnd: data[i].mtgend,
+            meetingType: data[i].mtgtype,
+            meetingInterest: data[i].mtginterest,
+            meetingDetails: data[i].mtgdetails
+        }).on('click', onClick);
+        myMarker.addTo(markerGroup);
+
+
+    function onClick(e) {
+        
+        markerGroup.clearLayers()
+        drawMarkers()
+        
+        large = L.MakiMarkers.icon({color: "FFF", size: "l"});
+    
+        e.target.setIcon(large).addTo(markerGroup)
+    	document.getElementById("meetingName").innerHTML = e.target.options.meetingName;
+    	document.getElementById("meetingPlace").innerHTML = e.target.options.meetingPlace;
+    	document.getElementById("meetingAddress").innerHTML = e.target.options.meetingAddress;
+    	document.getElementById("meetingAdd").innerHTML = e.target.options.meetingAdd;
+    	document.getElementById("meetingRoom").innerHTML = e.target.options.meetingRoom;
+    	var wheelchair = function(){
+    	if (e.target.options.wheelchair == true){
+    	   	return "Wheelchair Accessible"} 
+    	else {
+    	   	return "Not Wheelchair Accessible"}
+    	};
+    	document.getElementById("wheelchair").innerHTML = wheelchair();
+    	document.getElementById("meetingDay").innerHTML = e.target.options.meetingDay;
+    	document.getElementById("From").innerHTML = "From ";
+    	document.getElementById("meetingStart").innerHTML = String(e.target.options.meetingStart).slice(0,-3);
+    	document.getElementById("To").innerHTML = " To "; 
+    	document.getElementById("meetingEnd").innerHTML = String(e.target.options.meetingEnd).slice(0,-3);
+    	document.getElementById("Type").innerHTML = "Meeting Type: ";
+    	document.getElementById("meetingType").innerHTML = e.target.options.meetingType;
+    	document.getElementById("meetingInterest").innerHTML = e.target.options.meetingInterest;
+    	document.getElementById("meetingDetails").innerHTML = e.target.options.meetingDetails;
+    
+    	if (e.target.options.meetingName == "undefined") { document.getElementById("meetingName").innerHTML = ""; };
+    	if (e.target.options.meetingPlace === "undefined") { document.getElementById("meetingPlace").innerHTML = "";};
+    	if (e.target.options.meetingAddress === "undefined") { document.getElementById("meetingAddress").innerHTML = "";};
+    	if (e.target.options.meetingAdd === "undefined") {document.getElementById("meetingAdd").innerHTML = "";};
+    	if (e.target.options.meetingDay === "undefined") {document.getElementById("meetingDay").innerHTML = "";};
+    	if (e.target.options.wheelchair === "undefined") {document.getElementById("wheelchair").innerHTML = "";};
+    	if (e.target.options.meetingStart === "undefined") {document.getElementById("meetingStart").innerHTML = "";};
+    	if (e.target.options.meetingRoom === "undefined") {document.getElementById("meetingRoom").innerHTML = "";};
+    	if (e.target.options.meetingEnd === "undefined") {document.getElementById("meetingEnd").innerHTML = "";};
+    	if (e.target.options.meetingType === "undefined") {document.getElementById("meetingType").innerHTML = ""; document.getElementById("Type").innerHTML = "";};
+    	if (e.target.options.meetingInterest === "undefined") {document.getElementById("meetingInterest").innerHTML = "";};
+    	if (e.target.options.meetingDetails == "undefined") {document.getElementById("meetingDetails").innerHTML = "";};
+    	if (e.target.options.meetingDetails == "n/a") {document.getElementById("meetingDetails").innerHTML = "";};
+    
+       }
+    }
+};
+
+drawMarkers(); 
+
+function getCurrentLocation(e) {
+    currentLocation = e.latlng; 
+    drawMarkers();
+    }
+
+function calcDistance(data){
+
+    var lat1 = Math.abs(data.lat);
+    var lat2 = Math.abs(currentLocation.lat);
+    var lon1 = Math.abs(data.long);
+    var lon2 = Math.abs(currentLocation.lng);
+    var distanceValue = (lat1-lat2) + (lon1-lon2);
+
+    return distanceValue;
+    }
+
+map.on('locationfound', getCurrentLocation);
+</script>
+</body>
+</html>`;
+
+
+
+
 // respond to requests for /aameetings
 app.get('/aameetings', function(req, res) {
     
@@ -439,48 +791,272 @@ app.get('/aameetings', function(req, res) {
     client.query(thisQuery, (qerr, qres) => {
         if (qerr) { throw qerr }
         else {
-            res.send(qres.rows);
+            var resp = ax1 + JSON.stringify(qres.rows) + ax2; 
+            res.send(resp);
             client.end();
             console.log('2) responded to request for aa meeting data');
-            console.log(qres);
+            //console.log(qres);
         }
     });
 });
 
+var dx1 = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Dear Diary Visualization</title>
+      <script data-require="d3@4.0.0" data-semver="4.0.0" src="https://d3js.org/d3.v4.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <link href="https://fonts.googleapis.com/css?family=Oswald:200,400,700" rel="stylesheet">
+      <style>     
+      
+      html {
+        overflow-y:scroll;
+      }
+      
+      body {
+        font-family: "Oswald", sans-serif;
+        margin: 0px;
+        background-color: #FFF;
+      }
+
+
+      #on{
+        float:right;
+        font-weight:200;
+        margin-top: 26%;
+        margin-right:2%;
+        font-size: 2vw;
+      }
+      
+      #wasfeeling{
+        display: inline-block;
+        clear:both;
+        width: 100%;
+        font-weight:200;
+        font-size: 4vw;
+        text-align: center;
+      }
+      
+      #topleft{
+        float:left;
+        height:20%;
+        width:37%;
+      }
+      
+      #topright{
+        float:right;
+        height: 20%;
+        width: 63%;
+      }
+      
+      /* Style The Dropdown Button */
+      #dropbtn {
+        background-color: #7c4dac;
+        color: white;
+        padding: 5% 10%;
+        font-family: "Oswald", sans-serif;
+        font-weight: 800;
+        font-size: 2vw;
+        text-transform: uppercase;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        width: 140%;
+      }
+      
+      /* The container <div> - needed to position the dropdown content */
+      .dropdown {
+        position: relative;
+        display: inline-block;
+        margin-top: 13.5%;
+      }
+      
+      /* Dropdown Content (Hidden by Default) */
+      .dropdown-content {
+        font-family: "Oswald", sans-serif;
+        font-weight: 800;
+        font-size: 2vw;
+        text-transform: uppercase;
+        display: none;
+        position: absolute;
+        background-color: #7c4dac;
+        width:140%;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+      }
+      
+      /* Links inside the dropdown */
+      .dropdown-content a {
+        color: white;
+        padding: 12px;
+        text-decoration: none;
+        display: block;
+        background-color: #7c4dac;
+      }
+      
+      /* Change color of dropdown links on hover */
+      .dropdown-content a:hover {background-color: #4e1c82;}
+      
+      /* Show the dropdown menu on hover */
+      .dropdown:hover .dropdown-content {
+        display: block;
+        background-color: #4e1c82;
+      }
+      
+      /* Change the background color of the dropdown button when the dropdown content is shown */
+      .dropdown:hover .dropbtn {
+        background-color: #4e1c82;
+      }
+</style>
+  </head>
+  
+  <body>
+    <div id="topleft">
+    <div id="on">ON</div>
+    </div>
+    <div id="topright">
+      <div class="dropdown">
+        <button id="dropbtn">Select Date</button>
+        <div class="dropdown-content">
+          <a href="http://18.222.221.71:8080/deardiary?id=00">Saturday November 24th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=01">Sunday November 25th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=02">Monday November 26th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=03">Tuesday November 27th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=04">Wednesday November 28th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=05">Thursday November 29th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=06">Friday November 30th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=07">Saturday December 1st</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=08">Sunday December 2nd</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=09">Monday December 3rd</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=10">Tuesday December 4th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=11">Wednesday December 5th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=12">Thursday December 6th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=13">Friday December 7th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=14">Saturday December 8th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=15">Sunday December 9th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=16">Monday December 10th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=17">Tuesday December 11th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=18">Wednesday December 12th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=19">Thursday December 13th</a>
+          <a href="http://18.222.221.71:8080/deardiary?id=20">Friday December 14th</a>
+        </div>
+      </div>
+    </div>
+    <div id=wasfeeling>NIC WAS FEELING:</div>
+
+
+
+<script>
+
+var data =  `,
+dx2 = `;
+
+defaultSelection = "`,
+dx3 = `";
+
+var dateArray = ["Saturday November 24th", "Sunday November 25th", "Monday November 26th", "Tuesday November 27th", "Wednesday November 28th", "Thursday November 29th", "Friday November 30th", "Saturday December 1st", "Sunday December 2nd", "Monday December 3rd", "Tuesday December 4th", "Wednesday December 5th", "Thursday December 6th", "Friday December 7th", "Saturday December 8th", "Sunday December 9th", "Monday December 10th", "Tuesday December 11th", "Wednesday December 12th", "Thursday December 13th", "Friday December 14th"];
+
+//setting the button to the correct date
+document.getElementById("dropbtn").textContent = dateArray[parseInt(defaultSelection)];
+
+//getting the data out of the query response
+data = data[0];
+var feelings = data.feeling.SS;
+
+//start some d3 stuff
+var width = window.innerWidth,
+height = window.innerHeight/2,
+margin = {top:0,bottom:0,left:0,right:0};
+
+var svg = d3.select("body").append("svg")
+  .attr("width", width - (width*.02))
+  .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + ((width / feelings.length+1)+width*.04) + "," + ((height / 4) -margin.top) + ")");
+
+
+var widthScale = d3.scaleLinear()
+    .domain([0,feelings.length])
+    .range([0-((width/2)/feelings.length), (width/feelings.length)*(feelings.length-1)]);
+    
+
+//adding the text
+    
+svg.selectAll("text")
+  .data(feelings)
+  .enter()
+  .append("text")
+  .attr("x", function(d,i){return widthScale(i)})
+  .attr("y", function(){return 0})
+  .text(function(d,i){return feelings[i]})
+  .style("font-size","4vw")
+  .style("fill", "#1b4a7e")
+  .style("font-family", "Oswald, sans-serif")
+  .style("font-weight", "400")
+  .style("letter-spacing", "1px")
+  .style("text-align", "center")
+  .style("text-anchor", "middle")
+  .style("text-transform", "uppercase");
+  
+//moment().format(); //needed for moment library
+
+//sends the user to the new date selection 
+function getSelectValue(index)
+{
+    var selectedValue = index;
+    if(selectedValue <10){selectedValue="0"+selectedValue};
+    window.location.href = "http://18.222.221.71:8080/deardiary?id="+ selectedValue;
+}
+
+  </script>
+  </body>
+</html>` 
+
+
+    
+    
 // respond to requests for /deardiary
 app.get('/deardiary', function(req, res) {
+  
+  var  id = req.query.id;
+
     
-    console.log("hit");
+    // AWS DynamoDB credentials
+    AWS.config = new AWS.Config();
+    AWS.config.accessKeyId = process.env.AWS_ID;
+    AWS.config.secretAccessKey = process.env.AWS_KEY;
+    AWS.config.region = "us-east-2";
 
     // Connect to the AWS DynamoDB database
     var dynamodb = new AWS.DynamoDB();
     
-    // DynamoDB (NoSQL) query
+          // DynamoDB (NoSQL) query
     var params = {
-        TableName : "deardiary3",
-        KeyConditionExpression: "#pl = :platformName and #dt between :minDate and :maxDate", // the query expression
+        TableName: "deardiary",
+        KeyConditionExpression: "#pk = :pk", // the query expression
         ExpressionAttributeNames: { // name substitution, used for reserved words in DynamoDB
-             "#pl" : "platform",
-             "#dt" : "dt"
+            "#pk": "pk"
         },
         ExpressionAttributeValues: { // the query values
-            ":platformName": {S: "YouTube"},
-            ":minDate": {S: new Date("October 10, 2018").valueOf().toString()},
-            ":maxDate": {S: new Date("October 13, 2018").valueOf().toString()}
+            ":pk": { S: id}
         }
     };
+    
 
     dynamodb.query(params, function(err, data) {
         if (err) {
             console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
         }
         else {
-            res.send(data.Items);
+          var resp = dx1 + JSON.stringify(data.Items) + dx2 + id + dx3; 
+            res.send(resp);
+            //res.send(data.Items);
             console.log('3) responded to request for dear diary data');
         }
     });
-
 });
+
 
 // serve static files in /public
 app.use(express.static('public'));
